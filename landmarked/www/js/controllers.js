@@ -1,7 +1,15 @@
 angular.module('starter.controllers', [])
 
-.controller('LoginCtrl', function($scope){
+.controller('AppCtrl', function($scope){
 
+})
+
+.controller('LoginCtrl', function($scope, $state, $ionicPopup, AuthService){
+  $scope.data = {};
+
+  $scope.login = function(data){
+
+  }
 })
 
 .controller('RegisterCtrl', function($scope){

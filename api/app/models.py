@@ -3,6 +3,7 @@ from flask import json
 import datetime, decimal
 from dateutil import relativedelta
 from werkzeug.security import generate_password_hash, check_password_hash
+from passlib.apps import custom_app_context as pwd_context
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
@@ -21,7 +22,7 @@ class User(db.Model):
 	last_name = db.Column(db.String(50))
 	username = db.Column(db.String(20), index=True, unique=True)
 	phone = db.Column(db.String(20))
-	password = db.Column(db.String(40))
+	password_hash = db.Column(db.String(128))
 
 	landmarks = db.relationship('Landmark', backref=db.backref('User'))
 
@@ -49,13 +50,13 @@ class User(db.Model):
 		self.last_name = last_name
 		self.username = username
 		self.phone = phone
-		self.password = self.set_password(password)
-	
-	def set_password(self, password):
-		return generate_password_hash(password)
+		self.hash_password(password)
 
-	def check_password(self, password):
-		return check_password_hash(self.pw_hash, password)
+	def hash_password(self, password):
+		self.password_hash = pwd_context.encrypt(password)
+	
+	def verify_password(self, password):
+		return pwd_context.verify(password, self.password_hash)
 
 	def to_json(self):
 		json = {'id': self.id,

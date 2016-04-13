@@ -47,7 +47,7 @@ def update_user(user_id):
 		if 'phone' in form:
 			user.phone = request.form['phone']
 		if 'password' in form:
-			user.set_password(request.form['password'])
+			user.hash_password(request.form['password'])
 		db.session.commit()
 		return json.dumps({'status': 'OK', 'user': user.to_json()})
 

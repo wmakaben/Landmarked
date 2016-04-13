@@ -1,5 +1,11 @@
 angular.module('starter.services', [])
 
+.service('AuthService', function($q, $http){
+
+
+})
+
+
 /*
 .factory('Chats', function() {
   // Might use a resource here that returns a JSON array
