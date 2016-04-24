@@ -1,0 +1,10 @@
+<ion-view view-title="My Landmarks">
+  	<ion-content>
+  		<ion-list>
+			<ion-item class="item" ng-repeat="vl in visited_landmarks | orderBy:'date_created'" type="item-text-wrap" href="#tab/me/visited/{{ac.id}}">
+				<h2>{{vl.landmark.location_name}}</h2>
+				<p>{{vl.creator.first_name}} {{vl.creator.last_name}}</p>
+			</ion-item>
+		</ion-list>
+  	</ion-content>
+</ion-view>

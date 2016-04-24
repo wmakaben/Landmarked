@@ -1,0 +1,38 @@
+<ion-view view-title="Landmark">
+	<ion-content class="padding">
+		<h4><u>Location</u></h4>
+		<p>{{landmark.location_name}}</p>
+
+		<h5><u>Description</u></h5>
+		<p class="landmark-description">{{landmark.description}}</p>
+
+		<div ng-if="landmark.creator_info">
+			<p>Creator: {{landmark.creator_info.first_name}} {{landmark.creator_info.last_name}}</p>
+		</div>
+
+		<p>Date Created: {{landmark.date_created}}</p>
+
+		<div ng-if="landmark.date_expiration">
+			<p>Closes on: {{landmark.date_expiration}}</p>
+		</div>
+
+		<div ng-if="landmark.myLandmark">
+			<p><a href="#/tab/landmark/visitors/{{landmark.id}}">Visitor Count: {{landmark.visitor_count}}</a></p>
+		</div>
+		<div ng-if="landmark.isChallenge">
+			<p>Visitor Count: {{landmark.visitor_count}}</p>
+		</div>
+
+		<div id="landmark-footer" ng-if="landmark.isChallenge">
+			<div class="bar bar-footer">
+				<div ng-if="landmark.distance <= 1">
+					<button class="button button-positive button-block">Visit</button>
+				</div>
+
+				<div ng-if="landmark.distance > 1">
+					<button class="button button-stable button-block button-positive" disabled>Visit</button>
+				</div>	
+			</div>		
+		</div>
+	</ion-content>
+</ion-view>

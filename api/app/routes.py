@@ -1,16 +1,83 @@
-from flask import jsonify, make_response, request, json, abort
-from app import app, db
+from flask import jsonify, make_response, request, json, abort, g, current_app
+from app import app, db, auth
 from .models import DecimalEncoder, User, Landmark
-import datetime
 from dateutil import relativedelta
+from datetime import timedelta
+from functools import update_wrapper
+
+
+def crossdomain(origin=None, methods=None, headers=None,
+                max_age=21600, attach_to_all=True,
+                automatic_options=True):
+    if methods is not None:
+        methods = ', '.join(sorted(x.upper() for x in methods))
+    if headers is not None and not isinstance(headers, basestring):
+        headers = ', '.join(x.upper() for x in headers)
+    if not isinstance(origin, basestring):
+        origin = ', '.join(origin)
+    if isinstance(max_age, timedelta):
+        max_age = max_age.total_seconds()
+
+    def get_methods():
+        if methods is not None:
+            return methods
+
+        options_resp = current_app.make_default_options_response()
+        return options_resp.headers['allow']
+
+    def decorator(f):
+        def wrapped_function(*args, **kwargs):
+            if automatic_options and request.method == 'OPTIONS':
+                resp = current_app.make_default_options_response()
+            else:
+                resp = make_response(f(*args, **kwargs))
+            if not attach_to_all and request.method != 'OPTIONS':
+                return resp
+
+            h = resp.headers
+            h['Access-Control-Allow-Origin'] = origin
+            h['Access-Control-Allow-Methods'] = get_methods()
+            h['Access-Control-Max-Age'] = str(max_age)
+            h['Access-Control-Allow-Credentials'] = 'true'
+            h['Access-Control-Allow-Headers'] = \
+                "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+            if headers is not None:
+                h['Access-Control-Allow-Headers'] = headers
+            return resp
+
+        f.provide_automatic_options = False
+        return update_wrapper(wrapped_function, f)
+    return decorator
 
 @app.errorhandler(404)
 def not_found(error):
 	return make_response(jsonify({'error' : 'Not found'}), 404)
 
+@auth.verify_password
+def verify_password(username_or_token, password):
+	# first try to authenticate by token
+	user = User.verify_auth_token(username_or_token)
+	if not user:
+		# try to authenticate with username/password
+		user = User.query.filter_by(username=username_or_token).first()
+	if not user or not user.verify_password(password):
+		return False
+	g.user = user
+	return True
+
+# Request Token
+@app.route('/landmarked/api/v1.0/token', methods=['GET', 'POST'])
+@auth.login_required
+@crossdomain(origin='*')
+def get_auth_token():
+	token = g.user.generate_auth_token()
+	return jsonify({ 'token': token.decode('ascii') })
+
 # Make user
 @app.route('/landmarked/api/v1.0/users', methods=['POST'])
 def make_user():
+	print 'yo'
+	print request.form['first_name']
 	user = User(first_name = request.form['first_name'],
 				last_name = request.form['last_name'],
 				username = request.form['username'],

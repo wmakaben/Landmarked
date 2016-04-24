@@ -23,8 +23,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   });
 })
 
-.config(function($stateProvider, $urlRouterProvider) {
-
+.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+  $ionicConfigProvider.tabs.position('bottom');
   // Ionic uses AngularUI Router which uses the concept of states
   // Learn more here: https://github.com/angular-ui/ui-router
   // Set up the various states which the app can be in.
@@ -61,6 +61,51 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     }
   })
+    .state('tab.me-active-details', {
+      url:'/me/active/:landmarkId',
+      views: {
+        'tab-me': {
+          templateUrl: 'templates/landmark-details.html',
+          controller: 'MyLandmarkDetailCtrl'
+        }
+      }
+    })
+    .state('tab.me-created', {
+      url: '/me/created',
+      views: {
+        'tab-me': {
+          templateUrl: 'templates/me-created.html',
+          controller: 'MeCreatedCtrl'
+        }
+      }
+    })
+      .state('tab.me-created-details', {
+        url:'/me/created/:landmarkId',
+        views:{
+          'tab-me': {
+            templateUrl: 'templates/landmark-details.html',
+            controller: 'MyLandmarkDetailCtrl'
+          }
+        }
+      })
+    .state('tab.me-visited', {
+      url: '/me/visited',
+      views: {
+        'tab-me': {
+          templateUrl: 'templates/me-visited.html',
+          controller: 'MeVisitedCtrl'
+        }
+      }
+    })
+      .state('tab.me-visited-details', {
+        url:'/me/visited/:landmarkId',
+        views:{
+          'tab-me': {
+            templateUrl: 'templates/landmark-details.html',
+            controller: 'MyLandmarkDetailCtrl'
+          }
+        }
+      })
 
   .state('tab.landmarks', {
     url: '/landmarks',
@@ -71,6 +116,15 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     }
   })
+    .state('tab.landmarks-detail', {
+      url: '/landmarks/:landmarkId',
+      views: {
+        'tab-landmarks': {
+          templateUrl: 'templates/landmark-details.html',
+          controller: 'LandmarkDetailCtrl'
+        }
+      }
+    })
 
   .state('tab.friends', {
     url: '/friends',

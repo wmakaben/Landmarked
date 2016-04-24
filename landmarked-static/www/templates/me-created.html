@@ -1,0 +1,37 @@
+<ion-view view-title="My Landmarks">
+  	<ion-content>
+  		<ion-list>
+  			<div ng-if="inactive_count > 0">
+				<ion-item class="item-divider">
+					Inactive
+				</ion-item>
+				<ion-item class="item item-remove-animate" ng-repeat="ic in inactive_landmarks | orderBy:'date_created'" type="item-text-wrap" href="#tab/me/landmarks/{{ic.id}}">
+					<h2>{{ic.location_name}}</h2>
+
+					<ion-option-button class="button-assertive" ng-click="">
+						Delete
+					</ion-option-button>
+					<ion-option-button class="button-calm" ng-click="">
+						Reactivate
+					</ion-option-button>
+				</ion-item>
+			</div>
+
+			<div ng-if="active_count > 0">
+				<ion-item class="item-divider">
+					Active
+				</ion-item>
+				<ion-item class="item item-remove-animate" ng-repeat="ac in active_landmarks | orderBy:'date_created'" type="item-text-wrap" href="#tab/me/created/{{ac.id}}">
+					<h2>{{ac.location_name}}</h2>
+
+					<ion-option-button class="button-assertive" ng-click="">
+						Delete
+					</ion-option-button>
+					<ion-option-button class="button-energized" ng-click="">
+						Deactivate
+					</ion-option-button>
+				</ion-item>
+			</div>
+		</ion-list>
+  	</ion-content>
+</ion-view>

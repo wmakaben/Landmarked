@@ -1,0 +1,40 @@
+<ion-view view-title="Friends">
+	<ion-nav-buttons side="right">
+		<button class="button" ng-click="">
+			<i class="ion-person-add"></i>
+		</button>
+
+		<button class="button" ng-click="">
+			<i class="ion-android-add"></i>
+		</button>
+	</ion-nav-buttons>
+
+	<ion-content>
+		<ion-list>
+			
+			<ion-item class="item divider">
+				People you're following
+			</ion-item>
+			<ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="followed in following" type="item-text-wrap" href="#tab/friends/{{followed.id}}">
+				<img ng-src="img/placeholder-icon.png">
+				<h2>{{followed.first_name}} {{followed.last_name}}</h2>
+				<p>{{followed.username}}</p>
+				<i class="icon ion-chevron-right icon-accessory"></i>
+				
+				<ion-option-button class="button-assertive" ng-click="remove(followed)">
+					Delete
+				</ion-option-button>
+			</ion-item>
+
+			<ion-item class="item divider">
+				People following you
+			</ion-item>
+			<ion-item class="item-avatar item-icon-right" ng-repeat="follower in followers" type="item-text-wrap" href="#tab/friends/{{follower.id}}">
+				<img ng-src="img/placeholder-icon.png">
+				<h2>{{follower.first_name}} {{follower.last_name}}</h2>
+				<p>{{follower.username}}</p>
+				<i class="icon ion-chevron-right icon-accessory"></i>
+			</ion-item>
+		</ion-list>
+	</ion-content>
+</ion-view>

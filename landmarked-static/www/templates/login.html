@@ -1,4 +1,4 @@
-<ion-view view-title="Sign-In" name="login-view">
+<ion-view view-title="Sign-In" name="login-view" id="login">
 
 	<ion-content class="padding">
 		<div class="row" id="login-header">
@@ -7,13 +7,13 @@
 		
 		<div class="list list-inset">
 			<label class="item item-input">
-				<input type="text" placeholder="Username" ng-model="data.username">
+				<input type="text" placeholder="Username" ng-model="user.username">
 			</label>
 			<label class="item item-input">
-				<input type="password" placeholder="Password" ng-model="data.password">
+				<input type="password" placeholder="Password" ng-model="user.password">
 			</label>
 		</div>
-		<button class="button button-block button-positive" ng-click="login(data)">Login</button>
+		<button class="button button-block button-positive" ng-click="login(user)">Login</button>
 
 		<div class="row row-bottom" id="login-options">
 			<div class="col"><a href="#/register">Register</a></div>

@@ -1,58 +1,93 @@
-angular.module('starter.services', [])
+angular.module('starter.services', ['starter.constants'])
 
-.service('AuthService', function($q, $http){
+.service('AuthService', function($q, $http, RESOURCES){
+	var LOCAL_TOKEN_KEY = 'landmarked_token';
+	var username = '';
+	var isAuthenticated = false;
+	var authToken;
 
+	function loadUserCredentials(){
+		var token = window.localStorage.getItem(LOCAL_TOKEN_KEY);
+		if(token)
+			useCredentials(token);
+	}
+
+	function storeUserCredentials(token){
+		window.localStorage.setItem(LOCAL_TOKEN_KEY, token);
+		useCredentials(token);
+	}
+
+	function useCredentials(token){
+		//username = token.split('.')[0];
+		isAuthenticated = true;
+		authToken = token;
+
+    	// Set the token as header for your requests!
+    	$http.defaults.headers.common.Authorization = authToken;
+	}
+
+	function destroyUserCredentials(){
+		authToken = undefined;
+		username = '';
+		isAuthenticated = false;
+		$http.defaults.headers.common.Authorization = undefined;
+    	window.localStorage.removeItem(LOCAL_TOKEN_KEY);
+	}
+
+	var register = function(user){
+		return $q(function(resolve, reject){
+			$http.post(RESOURCES.apiURL + '/users', user, {
+				headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+			})
+			.then(function(result){
+				if (result.data.success) 
+					resolve(result.data.msg);
+				else
+					reject(result.data.msg);
+			});
+		});
+	};
+
+	var login = function(user){
+		return $q(function(resolve, reject){
+			$http.defaults.headers.common['Authorization'] = 'Basic ' + user.username + ':' + user.password;
+			$http.post(RESOURCES.apiURL + '/token', user).then(function(result){
+				if(result.data.success){
+					storeUserCredentials(result.data.token);
+					resolve(result.data.msg);
+				} 
+				else
+					reject(result.data.msg);
+			});
+		});
+	}
+
+	var logout = function(){
+		destroyUserCredentials();
+	}
+
+	loadUserCredentials();
+
+	return{
+		login: login,
+		register: register,
+		logout: logout,
+		isAuthenticated: function() { return isAuthenticated; }
+	};
 
 })
 
-
-/*
-.factory('Chats', function() {
-  // Might use a resource here that returns a JSON array
-
-  // Some fake testing data
-  var chats = [{
-    id: 0,
-    name: 'Ben Sparrow',
-    lastText: 'You on your way?',
-    face: 'img/ben.png'
-  }, {
-    id: 1,
-    name: 'Max Lynx',
-    lastText: 'Hey, it\'s me',
-    face: 'img/max.png'
-  }, {
-    id: 2,
-    name: 'Adam Bradleyson',
-    lastText: 'I should buy a boat',
-    face: 'img/adam.jpg'
-  }, {
-    id: 3,
-    name: 'Perry Governor',
-    lastText: 'Look at my mukluks!',
-    face: 'img/perry.png'
-  }, {
-    id: 4,
-    name: 'Mike Harrington',
-    lastText: 'This is wicked good ice cream.',
-    face: 'img/mike.png'
-  }];
-
+.factory('AuthInterceptor', function ($rootScope, $q, AUTH_EVENTS) {
   return {
-    all: function() {
-      return chats;
-    },
-    remove: function(chat) {
-      chats.splice(chats.indexOf(chat), 1);
-    },
-    get: function(chatId) {
-      for (var i = 0; i < chats.length; i++) {
-        if (chats[i].id === parseInt(chatId)) {
-          return chats[i];
-        }
-      }
-      return null;
+    responseError: function (response) {
+      $rootScope.$broadcast({
+        401: AUTH_EVENTS.notAuthenticated
+      }[response.status], response);
+      return $q.reject(response);
     }
   };
+})
+
+.config(function ($httpProvider) {
+  $httpProvider.interceptors.push('AuthInterceptor');
 });
-*/

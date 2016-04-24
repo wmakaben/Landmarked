@@ -1,0 +1,34 @@
+<ion-view view-title="Landmarks">
+	<ion-nav-buttons side="right">
+		<button class="button" ng-click="">
+			<i class="ion-map"></i>
+		</button>
+
+		<button class="button" ng-click="">
+			<i class="ion-android-add"></i>
+		</button>
+   	</ion-nav-buttons>
+
+	<ion-content>
+		<ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+		<ion-list>
+			<ion-item class="item-divider">
+				Landmarks from Friends
+			</ion-item>
+			<ion-item class="item item-remove-animate" ng-repeat="pc in pending_challenges | orderBy:'distance'" type="item-text-wrap" href="#tab/landmarks/{{pc.landmark.id}}">
+				<h2>{{pc.landmark.location_name}}</h2>
+				<p>{{pc.sender_details.first_name}} {{pc.sender_details.last_name}}</p>
+
+				<span class="badge badge-light">{{pc.distance}} mi</span>
+
+				<ion-option-button class="button-assertive" ng-click="remove(landmark)">
+					Delete
+				</ion-option-button>
+			</ion-item>
+
+			<ion-item class="item-divider">
+				Nearby Landmarks
+			</ion-item>
+		</ion-list>
+	</ion-content>
+</ion-view>

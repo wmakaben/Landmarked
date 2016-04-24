@@ -1,9 +1,9 @@
-from app import db
+from app import app, db
 from flask import json
 import datetime, decimal
 from dateutil import relativedelta
-from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.apps import custom_app_context as pwd_context
+from itsdangerous import Serializer, SignatureExpired, BadSignature
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
@@ -57,6 +57,22 @@ class User(db.Model):
 	
 	def verify_password(self, password):
 		return pwd_context.verify(password, self.password_hash)
+
+	def generate_auth_token(self):
+		s = Serializer(app.config['SECRET_KEY'])
+		return s.dumps({'id': self.id})
+
+	@staticmethod
+	def verify_auth_token(token):
+		s = Serializer(app.config['SECRET_KEY'])
+		try:
+			data = s.loads(token)
+		except SignatureExpired:
+			return None    # valid token, but expired
+		except BadSignature:
+			return None    # invalid token
+		user = User.query.get(data['id'])
+		return user
 
 	def to_json(self):
 		json = {'id': self.id,
