@@ -1,13 +1,16 @@
 <ion-view view-title="Landmark">
 	<ion-content class="padding">
+		<div ng-if="landmark.isChallenge">
+			<ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+		</div>
 		<h4><u>Location</u></h4>
 		<p>{{landmark.location_name}}</p>
 
 		<h5><u>Description</u></h5>
 		<p class="landmark-description">{{landmark.description}}</p>
 
-		<div ng-if="landmark.creator_info">
-			<p>Creator: {{landmark.creator_info.first_name}} {{landmark.creator_info.last_name}}</p>
+		<div ng-if="landmark.creator">
+			<p>Creator: {{landmark.creator.first_name}} {{landmark.creator.last_name}}</p>
 		</div>
 
 		<p>Date Created: {{landmark.date_created}}</p>
@@ -16,10 +19,10 @@
 			<p>Closes on: {{landmark.date_expiration}}</p>
 		</div>
 
-		<div ng-if="landmark.myLandmark">
-			<p><a href="#/tab/landmark/visitors/{{landmark.id}}">Visitor Count: {{landmark.visitor_count}}</a></p>
+		<div ng-if="landmark.myLandmark && landmark.visitor_count > 0">
+			<p><a href="#/tab/me/landmark/visitors/{{landmark.id}}">Visitor Count: {{landmark.visitor_count}}</a></p>
 		</div>
-		<div ng-if="landmark.isChallenge">
+		<div ng-if="!landmark.myLandmark || landmark.visitor_count == 0">
 			<p>Visitor Count: {{landmark.visitor_count}}</p>
 		</div>
 

@@ -10,6 +10,9 @@
    	</ion-nav-buttons>
 
 	<ion-content>
+
+		<ion-refresher pulling-text="Pull to refresh..." on-refresh="doRefresh()"></ion-refresher>
+		
 		<ion-list>
 			<ion-item id="user-header" class="item-avatar item-divider" type="item-text-wrap">
 				<img ng-src="img/placeholder-icon.png">

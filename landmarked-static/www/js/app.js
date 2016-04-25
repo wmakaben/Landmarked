@@ -88,6 +88,15 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           }
         }
       })
+        .state('tab.me-landmark-visitors', {
+          url:'/me/landmark/visitors/:landmarkId',
+          views:{
+            'tab-me': {
+              templateUrl: 'templates/landmark-visitors.html',
+              controller: 'LandmarkVisitorsCtrl'
+            }
+          }
+        })
     .state('tab.me-visited', {
       url: '/me/visited',
       views: {
@@ -134,7 +143,25 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         controller: 'FriendsCtrl'
       }
     }
-  });
+  })
+    .state('tab.friends-profile',{
+      url: '/friends/:userId',
+      views:{
+        'tab-friends':{
+          templateUrl: 'templates/user-profile.html',
+          controller: 'FriendProfileCtrl'
+        }
+      }
+    })
+    .state('tab.friends-landmark', {
+      url: '/friends/landmark/:landmarkId',
+      views:{
+        'tab-friends':{
+          templateUrl: 'templates/landmark-details.html',
+          controller: 'FriendLandmarkDetailCtrl'
+        }
+      }
+    });
 
   // if none of the above states are matched, use this as the fallback
   //$urlRouterProvider.otherwise('/tab/landmarks');

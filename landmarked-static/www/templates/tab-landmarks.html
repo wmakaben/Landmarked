@@ -4,7 +4,7 @@
 			<i class="ion-map"></i>
 		</button>
 
-		<button class="button" ng-click="">
+		<button class="button" ng-click="createLandmark()">
 			<i class="ion-android-add"></i>
 		</button>
    	</ion-nav-buttons>
@@ -15,20 +15,28 @@
 			<ion-item class="item-divider">
 				Landmarks from Friends
 			</ion-item>
-			<ion-item class="item item-remove-animate" ng-repeat="pc in pending_challenges | orderBy:'distance'" type="item-text-wrap" href="#tab/landmarks/{{pc.landmark.id}}">
+			<ion-item class="item item-remove-animate" ng-repeat="pc in challenges.pending | orderBy:'distance'" type="item-text-wrap" href="#tab/landmarks/{{pc.landmark.id}}">
 				<h2>{{pc.landmark.location_name}}</h2>
-				<p>{{pc.sender_details.first_name}} {{pc.sender_details.last_name}}</p>
+				<p>{{pc.sender.first_name}} {{pc.sender.last_name}}</p>
 
 				<span class="badge badge-light">{{pc.distance}} mi</span>
 
-				<ion-option-button class="button-assertive" ng-click="remove(landmark)">
-					Delete
+				<ion-option-button class="button-assertive" ng-click="hide(pc)">
+					Hide
 				</ion-option-button>
 			</ion-item>
 
 			<ion-item class="item-divider">
 				Nearby Landmarks
 			</ion-item>
+			<div ng-if="challenges.local[0].distance">
+				<ion-item class="item" ng-repeat="lc in challenges.local | orderBy:'distance'" type="item-text-wrap" href="#tab/landmarks/{{lc.id}}">
+					<h2>{{lc.location_name}}</h2>
+					<p>{{lc.sender.first_name}} {{lc.sender.last_name}}</p>
+
+					<span class="badge badge-light">{{lc.distance}} mi</span>
+				</ion-item>
+			</div>
 		</ion-list>
 	</ion-content>
 </ion-view>

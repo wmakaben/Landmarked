@@ -1,13 +1,14 @@
 angular.module('starter.services', ['starter.constants'])
 
-.factory('GeoService', function($ionicLoading){
+// TODO: all add and remove methods
+
+.factory('GeoService', function($ionicLoading, $ionicPopup){
 	console.log('GeoAlert service instantiated');
 	// Callback function after retrieving location
 	var callback;
-	// TODO: set min distance to landmark discover radius
-	var minDistance = 10;
-
+	// Variables for target landmarks
 	var challenges, landmark;
+	var coordinates;
 
 	// https://www.geodatasource.com/developers/javascript
 	// Gets distance between coordinate points
@@ -33,9 +34,19 @@ angular.module('starter.services', ['starter.constants'])
 	};
 
 	// Geolocation error
-    function error(err){
-      console.warn('Error(' + err.code + '): ' + err.message);
-      $ionicLoading.hide();
+	function error(err){
+		console.warn('Error(' + err.code + '): ' + err.message);
+		$ionicLoading.hide();
+
+		// TODO: test
+		var alertPopup = $ionicPopup.alert({
+			title: 'Unable to retrieve location',
+			template: 'Pull down to refresh'
+		});
+
+		alertPopup.then(function(res) {
+			console.log('Unable to retrieve location');
+		});
     };
 
     // Geolocation success (add distances to challenges)
@@ -47,17 +58,27 @@ angular.module('starter.services', ['starter.constants'])
     	console.log('Latitude: ' + lat1);
     	console.log('Longitude: ' + lon1);
 
-    	for(c of challenges){
+    	// Get distance for pending challenges
+    	for(c of challenges.pending){
     		var lat2 = c.landmark.latitude;
     		var lon2 = c.landmark.longitude;
-
     		var d = parseFloat(getDistance(lat1, lon1, lat2, lon2).toFixed(2));
     		if(d > 10)
     			d = parseInt(d);
-
     		c.distance = d;
     	}
-    	callback();
+
+    	// Get distance for local landmarks
+    	for(c of challenges.local){   		
+    		var d = parseFloat(getDistance(lat1, lon1, c.latitude, c.longitude).toFixed(2));
+    		if(d > 10)
+    			d = parseInt(d);
+    		c.distance = d;
+    	}
+
+    	// Callback
+    	if(callback)
+    		callback();
     };
 
     // Geolocation success (return distance from )
@@ -92,6 +113,21 @@ angular.module('starter.services', ['starter.constants'])
 				s();
 			navigator.geolocation.getCurrentPosition(getTargetDistance, error, options);
 			return landmark;
+		},
+		get_location: function(){
+			$ionicLoading.show({
+				content: 'Loading',
+				animation: 'fade-in',
+				showBackdrop: true,
+				maxWidth: 200,
+				showDelay: 0
+			});
+
+			navigator.geolocation.getCurrentPosition(function(pos){
+				coordinates = pos;
+				$ionicLoading.hide();
+			}, error, options);	
+			return coordinates;		
 		}
 	};
 })
@@ -147,14 +183,15 @@ angular.module('starter.services', ['starter.constants'])
 	}
 })
 
-.factory('Landmarks', function(){
+.factory('Landmarks', function(Users){
 	var landmarks = [{
 		id: 1,
 		location_name: 'Villanova University',
 		latitude: 40.037222,
 		longitude: -75.349167,
 		description: 'Check out an on campus event',
-		creator: 5,
+		creator_id: 5,
+		creator: Users.get(5),
 		date_created: formatDate(new Date()),
 		date_expiration: null,
 		status: 1,
@@ -165,7 +202,8 @@ angular.module('starter.services', ['starter.constants'])
 		latitude: 40.0359449,
 		longitude: -75.34767339999996,
 		description: 'Try their new burger',
-		creator: 3,
+		creator_id: 3,
+		creator: Users.get(3),
 		date_created: formatDate(new Date()),
 		date_expiration: null,
 		status: 1,
@@ -176,7 +214,8 @@ angular.module('starter.services', ['starter.constants'])
 		latitude: 40.583229,
 		longitude: -75.941910,
 		description: 'Make it to the Pinnacle viewpoint',
-		creator: 2,
+		creator_id: 2,
+		creator: Users.get(2),
 		date_created: formatDate(new Date()),
 		date_expiration: null,
 		status: 1,
@@ -187,7 +226,8 @@ angular.module('starter.services', ['starter.constants'])
 		latitude: 40.0244978,
 		longitude: -75.2119462,
 		description: 'Try some beer',
-		creator: 2,
+		creator_id: 2,
+		creator: Users.get(2),
 		date_created: formatDate(new Date()),
 		date_expiration: formatDate(new Date()),
 		status: 1,
@@ -198,7 +238,8 @@ angular.module('starter.services', ['starter.constants'])
 		latitude: 40.0295457,
 		longitude: -75.205888,
 		description: 'Try a Cheesesteak',
-		creator: 4,
+		creator_id: 4,
+		creator: Users.get(4),
 		date_created: formatDate(new Date()),
 		date_expiration: formatDate(new Date()),
 		status: 1,
@@ -209,7 +250,8 @@ angular.module('starter.services', ['starter.constants'])
 		latitude: 40.037222,
 		longitude: -75.349167,
 		description: 'Check out the demo for Landmarked',
-		creator: 1,
+		creator_id: 1,
+		creator: Users.get(1),
 		date_created: formatDate(new Date()),
 		date_expiration: null,
 		status: 1,
@@ -220,7 +262,20 @@ angular.module('starter.services', ['starter.constants'])
 		latitude: 40.0244978,
 		longitude: -75.2119462,
 		description: 'Local Landmark Test',
-		creator: 1,
+		creator_id: 1,
+		creator: Users.get(1),
+		date_created: formatDate(new Date()),
+		date_expiration: null,
+		status: 2,
+		discover_radius: 30
+	}, {
+		id: 8,
+		location_name: 'Local Landmark 2',
+		latitude: 40.0244978,
+		longitude: -75.2119462,
+		description: 'Local Landmark Test 2',
+		creator_id: 1,
+		creator: Users.get(1),
 		date_created: formatDate(new Date()),
 		date_expiration: null,
 		status: 2,
@@ -237,35 +292,48 @@ angular.module('starter.services', ['starter.constants'])
 			landmarks.splice(landmarks.indexOf(landmark), 1);
 		},
 		get: function(landmarkId){
-			for(var i=0; i<landmarks.length; i++){
-				if(landmarks[i].id === parseInt(landmarkId))
-					return landmarks[i];
+			for(l of landmarks){
+				if(l.id === parseInt(landmarkId))
+					return l;
 			}
 			return null;
 		},
+		create: function(landmark){
+			landmark.id = landmarks[landmarks.length-1].id + 1;
+			landmark.creator = Users.get(landmark.creator_id);
+			landmark.date_created = formatDate(new Date());
+			landmark.date_expiration = null;
+			landmark.status = 1;
+			landmark.discover_radius = 0;
+
+			landmarks.push(landmark);
+			console.log('Landmark Created');
+			console.log(landmark)
+			return landmark;
+		},
 		get_by_user: function(userId){
 			user_landmarks = [];
-			for(var i=0; i<landmarks.length; i++){
-				if(landmarks[i].creator === parseInt(userId) && landmarks[i].status != 0)
-					user_landmarks.push(landmarks[i]);
+			for(l of landmarks){
+				if(l.creator_id === parseInt(userId) && l.status != 0)
+					user_landmarks.push(l);
 			}
 			return user_landmarks;
 		},
 		get_inactive: function(userId){
 			user_landmarks = [];
-			for(var i=0; i<landmarks.length; i++){
-				if(landmarks[i].creator === parseInt(userId) && landmarks[i].status == 0)
-					user_landmarks.push(landmarks[i]);
+			for(l of landmarks){
+				if(l.creator_id === parseInt(userId) && l.status == 0)
+					user_landmarks.push(l);
 			}
 			return user_landmarks;
 		},
 		get_persistent: function(){
 			local_landmarks = [];
-			for(var i=0; i<landmarks.length; i++){
-				if(landmarks[i].status == 2)
-					local_landmarks.push(landmarks[i]);
+			for(l of landmarks){
+				if(l.status == 2)
+					local_landmarks.push(l);
 			}
-			return local_landmarks;
+			return local_landmarks
 		}
 	}
 })
@@ -273,181 +341,337 @@ angular.module('starter.services', ['starter.constants'])
 .factory('Followers', function(Users){
 	var followers = [{
 		followerId: 2,
-		followedId: 1
+		follower: Users.get(2),
+		followedId: 1,
+		followed: Users.get(1)
 	}, {
 		followerId: 3,
-		followedId: 1
+		follower: Users.get(3),
+		followedId: 1,
+		followed: Users.get(1)
 	}, {
 		followerId: 4,
-		followedId: 1
+		follower: Users.get(4),
+		followedId: 1,
+		followed: Users.get(1)
 	}, {
 		followerId: 5,
-		followedId: 1
+		follower: Users.get(5),
+		followedId: 1,
+		followed: Users.get(1)
 	}, {
 		followerId: 2,
-		followedId: 3
+		follower: Users.get(2),
+		followedId: 3,
+		followed: Users.get(3)
 	}, {
 		followerId: 3,
-		followedId: 2
+		follower: Users.get(3),
+		followedId: 2,
+		followed: Users.get(3)
 	}, {
 		followerId: 3,
-		followedId: 4
+		follower: Users.get(3),
+		followedId: 4,
+		followed: Users.get(4)
 	}, {
 		followerId: 4,
-		followedId: 3
+		follower: Users.get(4),
+		followedId: 3,
+		followed: Users.get(3)
 	}, {
 		followerId: 2,
-		followedId: 4
+		follower: Users.get(2),
+		followedId: 4,
+		followed: Users.get(4)
 	}, {
 		followerId: 2,
-		followedId: 5
+		follower: Users.get(2),
+		followedId: 5,
+		followed: Users.get(5)
 	}, {
 		followerId: 5,
-		followedId: 2
+		follower: Users.get(5),
+		followedId: 2,
+		followed: Users.get(2)
 	}, {
 		followerId: 3,
-		followedId: 5
+		follower: Users.get(3),
+		followedId: 5,
+		followed: Users.get(5)
 	}, {
 		followerId: 5,
-		followedId: 3
+		follower: Users.get(5),
+		followedId: 3,
+		followed: Users.get(3)
 	}];
 
 	return {
 		get_following: function(userId){
-			var f = [];
-			for(var i=0; i<followers.length; i++){
-				if(followers[i].followerId === parseInt(userId)){
-					f.push(Users.get(followers[i].followedId));
+			var fl = [];
+			for(f of followers){
+				if(f.followerId === parseInt(userId)){
+					fl.push(f.followed);
 				}
 			}
-			return f;
+			return fl;
 		},
 		get_followers: function(userId){
-			var f = [];
-			for(var i=0; i<followers.length; i++){
-				if(followers[i].followedId === parseInt(userId))
-					f.push(Users.get(followers[i].followerId));
+			var fl = [];
+			for(f of followers){
+				if(f.followedId === parseInt(userId))
+					fl.push(f.follower);
 			}
+			return fl;
+		},
+		unfollow: function(userId, followedId){
+			console.log('Unfollowing User');
+			console.log(Users.get(followedId));
+			for(var i=0; i<followers.length; i++){
+				if(userId == followers[i].followerId && followedId == followers[i].followedId){
+					followers.splice(i, 1);
+					break;
+				}
+			}
+			console.log('Followers');
+			console.log(followers);
+		},
+		follow: function(userId, followedId){
+			console.log('Following User');
+			console.log(User.get(followedId));
+
+			var f = {}
+			f.followerId = userId;
+			f.follower = Users.get(userId);
+			f.followedId = followedId;
+			f.followed = Users.get(followedId);
+
+			followers.push(f);
 			return f;
 		}
-		// TODO: remove
 		// TODO: follow
 	};
 })
 
 //TODO: when user visits local, add the a challenge as completed
 //TODO: in db only cascade delete for recipient when status = 0, 1
+//TODO: add timestamp for completion
 
 .factory('Challenges', function(Users, Landmarks){
 	var challenges = [{
+		id: 1,
 		landmark_id: 6,
-		sender: 1,
-		recipient: 2,
+		landmark: Landmarks.get(6),
+		sender_id: 1,
+		sender: Users.get(1),
+		recipient_id: 2,
+		recipient: Users.get(2),
 		status: 1
 	}, {
+		id: 2,
 		landmark_id: 6,
-		sender: 1,
-		recipient: 3,
+		landmark: Landmarks.get(6),
+		sender_id: 1,
+		sender: Users.get(1),
+		recipient_id: 3,
+		recipient: Users.get(3),
 		status: 1
 	}, {
+		id: 3,
 		landmark_id: 6,
-		sender: 1,
-		recipient: 4,
+		landmark: Landmarks.get(6),
+		sender_id: 1,
+		sender: Users.get(1),
+		recipient_id: 4,
+		recipient: Users.get(4),
 		status: 1
 	}, {
+		id: 4,
 		landmark_id: 6,
-		sender: 1,
-		recipient: 5,
+		landmark: Landmarks.get(6),
+		sender_id: 1,
+		sender: Users.get(1),
+		recipient_id: 5,
+		recipient: Users.get(5),
 		status: 1
 	}, {
+		id: 5,
 		landmark_id: 1,
-		sender: 5,
-		recipient: 2,
+		landmark: Landmarks.get(1),
+		sender_id: 5,
+		sender: Users.get(5),
+		recipient_id: 2,
+		recipient: Users.get(2),
 		status: 1
 	}, {
+		id: 6,
 		landmark_id: 1,
-		sender: 5,
-		recipient: 3,
+		landmark: Landmarks.get(1),
+		sender_id: 5,
+		sender: Users.get(5),
+		recipient_id: 3,
+		recipient: Users.get(3),
 		status: 3
 	}, {
+		id: 7,
 		landmark_id: 1,
-		sender: 3,
-		recipient: 4,
+		landmark: Landmarks.get(1),
+		sender_id: 3,
+		sender: Users.get(3),
+		recipient_id: 4,
+		recipient: Users.get(4),
 		status: 1
 	}, {
+		id: 8,
 		landmark_id: 2,
-		sender: 3,
-		recipient: 2,
+		landmark: Landmarks.get(2),
+		sender_id: 3,
+		sender: Users.get(3),
+		recipient_id: 2,
+		recipient: Users.get(2),
 		status: 2
 	}, {
+		id: 9,
 		landmark_id: 2,
-		sender: 3,
-		recipient: 4,
+		landmark: Landmarks.get(2),
+		sender_id: 3,
+		sender: Users.get(3),
+		recipient_id: 4,
+		recipient: Users.get(4),
 		status: 1
 	}, {
+		id: 10,
 		landmark_id: 2,
-		sender: 3,
-		recipient: 5,
+		landmark: Landmarks.get(2),
+		sender_id: 3,
+		sender: Users.get(3),
+		recipient_id: 5,
+		recipient: Users.get(5),
 		status: 1
 	}, {
+		id: 11,
 		landmark_id: 3,
-		sender: 2,
-		recipient: 3,
+		landmark: Landmarks.get(3),
+		sender_id: 2,
+		sender: Users.get(2),
+		recipient_id: 3,
+		recipient: Users.get(3),
 		status: 1
 	}, {
+		id: 12,
 		landmark_id: 3,
-		sender: 2,
-		recipient: 5,
+		landmark: Landmarks.get(3),
+		sender_id: 2,
+		sender: Users.get(2),
+		recipient_id: 5,
+		recipient: Users.get(5),
 		status: 1
 	}, {
+		id: 13,
 		landmark_id: 4,
-		sender: 2,
-		recipient: 3,
+		landmark: Landmarks.get(4),
+		sender_id: 2,
+		sender: Users.get(2),
+		recipient_id: 3,
+		recipient: Users.get(3),
 		status: 3
 	}, {
+		id: 14,
 		landmark_id: 4,
-		sender: 2,
-		recipient: 5,
+		landmark: Landmarks.get(4),
+		sender_id: 2,
+		sender: Users.get(2),
+		recipient_id: 5,
+		recipient: Users.get(5),
 		status: 1
 	}, {
+		id: 15,
 		landmark_id: 4,
-		sender: 3,
-		recipient: 4,
+		landmark: Landmarks.get(4),
+		sender_id: 3,
+		sender: Users.get(3),
+		recipient_id: 4,
+		recipient: Users.get(4),
 		status: 1
 	}, {
+		id: 16,
 		landmark_id: 5,
-		sender: 4,
-		recipient: 2,
+		landmark: Landmarks.get(5),
+		sender_id: 4,
+		sender: Users.get(4),
+		recipient_id: 2,
+		recipient: Users.get(2),
 		status: 3
 	}, {
+		id: 17,
 		landmark_id: 5,
-		sender: 4,
-		recipient: 3,
+		landmark: Landmarks.get(5),
+		sender_id: 4,
+		sender: Users.get(4),
+		recipient_id: 3,
+		recipient: Users.get(3),
 		status: 1
 	}, {
+		id: 18,
 		landmark_id: 5,
-		sender: 2,
-		recipient: 5,
+		landmark: Landmarks.get(5),
+		sender_id: 2,
+		sender: Users.get(2),
+		recipient_id: 5,
+		recipient: Users.get(5),
 		status: 1
+	}, {
+		id: 19,
+		landmark_id: 8,
+		landmark: Landmarks.get(8),
+		sender_id: 1,
+		sender: Users.get(1),
+		recipient_id: 3,
+		recipient: Users.get(3),
+		status: 2
 	}];
 
 	return{
+		create: function(senderId, recipientId, landmarkId){
+			var c = {};
+			c.id = challenges[challenges.length-1].id + 1;
+			c.landmark_id = landmarkId;
+			c.landmark = Landmarks.get(landmarkId);
+			c.sender_id = senderId;
+			c.sender = Users.get(senderId);
+			c.recipient_id = recipientId;
+			c.recipient = Users.get(recipientId);
+			c.status = 1;
+			challenges.push(c);
+			console.log("Challenge Created");
+			console.log(c);
+		},
+		get: function(cId){
+			for(c of challenges){
+				if(cId == c.id)
+					return c;
+			}
+		},
+		hide: function(ch){
+			for(c of challenges){
+				if(c.id == ch.id){
+					c.status = 0;
+					break;
+				}
+			}
+		},
 		get_pending: function(userId){
 			var pending = [];
 			for(c of challenges){
-				if(c.recipient === parseInt(userId) && c.status === 1){
-					var challenge = c;
-					challenge.landmark = Landmarks.get(c.landmark_id);
-					challenge.sender_details = Users.get(c.sender);
-					pending.push(challenge);
-				}
+				if(c.recipient_id === parseInt(userId) && c.status === 1)
+					pending.push(c);
 			}
 			return pending
 		},
 		get_completed: function(userId){
 			var completed = [];
 			for(c of challenges){
-				if(c.recipient === parseInt(userId) && c.status > 1)
+				if(c.recipient_id === parseInt(userId) && c.status > 1)
 					completed.push(c);
 			}
 			return completed
@@ -456,22 +680,40 @@ angular.module('starter.services', ['starter.constants'])
 			var visitors = [];
 			for(c of challenges){
 				if(c.landmark_id == parseInt(landmarkId) && c.status > 1)
-					visitors.push(Users.get(c.recipient));
+					visitors.push(c.recipient);
 			}
 			return visitors;
 		},
 		get_visited: function(userId){
 			var visited = [];
 			for(c of challenges){
-				if(c.status > 1 && c.recipient == parseInt(userId)){
-					var v = c;
-					v.landmark = Landmarks.get(c.landmark_id);
-					v.creator = Users.get(v.landmark.creator);
-					console.log(v);
-					visited.push(v);
-				}
+				if(c.status > 1 && c.recipient_id == parseInt(userId))
+					visited.push(c);
 			}
 			return visited;
+		},
+		get_persistent: function(userId){			
+			local_landmarks = Landmarks.get_persistent();
+			for(c of challenges){
+				if(local_landmarks.length == 0)
+						break;
+				for(l of local_landmarks){
+					if(c.status > 1 && c.landmark_id == l.id && c.recipient_id == userId){
+						local_landmarks.splice(local_landmarks.indexOf(l), 1);
+						break;
+					}
+				}
+			}
+			return local_landmarks;
+		},
+		unfollow_challenges: function(userId, followedId){
+			rem_indexes = [];
+			for(var i=0; i<challenges.length; i++){
+				if(challenges[i].recipient_id == userId && challenges[i].sender_id == followedId)
+					rem_indexes.push(i);
+			}
+			for(var i=rem_indexes.length-1; i>=0; i--)
+				challenges.splice(rem_indexes[i], 1);
 		}
 	}
 })

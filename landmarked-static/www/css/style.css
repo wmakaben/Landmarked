@@ -3,6 +3,10 @@ button > i{
 	font-size: 25px;
 }
 
+.modal-textarea{
+	min-height: 100px;
+}
+
 /* ======= Login ======= */
 
 .scroll{
