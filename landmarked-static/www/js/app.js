@@ -53,6 +53,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   // Each tab has its own nav history stack:
 
   .state('tab.me', {
+    cache: false,
     url: '/me',
     views: {
       'tab-me': {
@@ -117,6 +118,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       })
 
   .state('tab.landmarks', {
+    cache: false,
     url: '/landmarks',
     views: {
       'tab-landmarks': {
@@ -125,6 +127,15 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     }
   })
+    .state('tab.landmarks-map',{
+      url: '/landmarks/map',
+      views: {
+        'tab-landmarks':{
+          templateurl: 'templates/map.html',
+          controller: 'MapCtrl'
+        }
+      }
+    })
     .state('tab.landmarks-detail', {
       url: '/landmarks/:landmarkId',
       views: {
@@ -136,6 +147,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     })
 
   .state('tab.friends', {
+    cache: false,
     url: '/friends',
     views: {
       'tab-friends': {

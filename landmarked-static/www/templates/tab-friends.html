@@ -1,10 +1,10 @@
 <ion-view view-title="Friends">
 	<ion-nav-buttons side="right">
-		<button class="button" ng-click="">
+		<button class="button" ng-click="openFModal()">
 			<i class="ion-person-add"></i>
 		</button>
 
-		<button class="button" ng-click="">
+		<button class="button" ng-click="createLandmark()">
 			<i class="ion-android-add"></i>
 		</button>
 	</ion-nav-buttons>
@@ -39,3 +39,33 @@
 		</ion-list>
 	</ion-content>
 </ion-view>
+
+<script id="friends-modal.html" type="text/ng-template">
+	<ion-modal-view>
+		<ion-header-bar class="bar bar-header bar-positive">
+			<h1 class="title">Friend Search</h1>
+			<button class="button button-clear button-primary" ng-click="fModal.hide()">Close</button>
+		</ion-header-bar>
+		<ion-content class="padding">
+			<div class="list">
+				<label class="item item-input">
+					<input ng-model="search_username" type="text" placeholder="Search by username" ng-keyup="getSearch(search_username)">
+				</label>
+			</div>
+
+			<ion-list class="search-result-list">
+				<ion-item class="item item-avatar item-button-right" ng-repeat="user in search" type="item-text-wrap">
+					<img ng-src="img/placeholder-icon.png">
+					<h3>{{user.username}}</h3>
+					<p>{{user.first_name}} {{user.last_name}}</p>
+
+					<button ng-if="user.isFollowing" class="button button-balanced" disabled>
+						<i class="icon ion-checkmark-round"></i>
+					</button>
+					<button ng-if="!user.isFollowing" class="button button-balanced" ng-click="followUser(user.id)">
+						<i class="icon ion-android-add"></i>
+					</button>
+			</ion-list>
+		</ion-content>
+	</ion-modal-view>
+</script>

@@ -7,6 +7,9 @@ button > i{
 	min-height: 100px;
 }
 
+.search-result-list button{
+	margin-top: 12px;
+}
 /* ======= Login ======= */
 
 .scroll{

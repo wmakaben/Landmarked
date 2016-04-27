@@ -10,4 +10,4 @@ angular.module('starter.constants', [])
 	notAuthenticated: 'auth-not-authenticated'
 })
 
-.constant('TMP_USER', 2);
+.constant('TMP_USER', 3);

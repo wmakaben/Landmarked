@@ -29,13 +29,26 @@
 		<div id="landmark-footer" ng-if="landmark.isChallenge">
 			<div class="bar bar-footer">
 				<div ng-if="landmark.distance <= 1">
-					<button class="button button-positive button-block">Visit</button>
+					<button class="button button-positive button-block" ng-click="checkIn()">Check In</button>
 				</div>
 
 				<div ng-if="landmark.distance > 1">
-					<button class="button button-stable button-block button-positive" disabled>Visit</button>
+					<button class="button button-stable button-block button-positive" disabled>Check In</button>
 				</div>	
 			</div>		
 		</div>
 	</ion-content>
 </ion-view>
+<!--
+<script id="map-modal.html" type="text/ng-template">
+    <ion-modal-view>
+        <ion-header-bar class="bar bar-header bar-positive">
+            <h1 class="title">Map View</h1>
+            <button class="button button-clear button-primary" ng-click="modal.hide()">Close</button>
+        </ion-header-bar>
+        <ion-content>
+            <div id="map" data-tap-disabled="true"></div>
+        </ion-content>
+    </ion-modal-view>
+</script>
+-->

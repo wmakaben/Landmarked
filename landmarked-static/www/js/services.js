@@ -1,5 +1,24 @@
 angular.module('starter.services', ['starter.constants'])
 
+// TODO: replace with user auth token
+.factory('UserAccount', function(Users){
+	var user;
+
+	return {
+		login: function(username){
+			user = Users.get_by_username(username);
+			return user;
+		},
+		logout: function(){
+			user = null;
+		},
+		get: function(){
+			return user;
+		}
+	}
+})
+
+
 // TODO: all add and remove methods
 
 .factory('GeoService', function($ionicLoading, $ionicPopup){
@@ -171,12 +190,19 @@ angular.module('starter.services', ['starter.constants'])
 			}			
 			return null;
 		},
+		get_by_username: function(username){
+			for(u of users){
+				if(u.username == username)
+					return u
+			}			
+			return null;
+		},
 		// Returns a list of usernames containing a given search phrase
-		search: function(username){
+		search: function(username, userId){
 			var search = []
 			for(u of users){
-				if(u.username.indexOf(username) > -1)
-					search.push(user[i]);
+				if(u.username.toLowerCase().indexOf(username.toLowerCase()) > -1 && u.id != userId)
+					search.push(u);
 			}
 			return search
 		}
@@ -189,7 +215,7 @@ angular.module('starter.services', ['starter.constants'])
 		location_name: 'Villanova University',
 		latitude: 40.037222,
 		longitude: -75.349167,
-		description: 'Check out an on campus event',
+		description: 'Check out the home of the 2016 NCAA Mens Basketball Champs',
 		creator_id: 5,
 		creator: Users.get(5),
 		date_created: formatDate(new Date()),
@@ -247,8 +273,8 @@ angular.module('starter.services', ['starter.constants'])
 	}, {
 		id: 6,
 		location_name: 'Villanova, Mendel 296',
-		latitude: 40.037222,
-		longitude: -75.349167,
+		latitude: 40.0379563,
+		longitude: -75.3424296,
 		description: 'Check out the demo for Landmarked',
 		creator_id: 1,
 		creator: Users.get(1),
@@ -438,7 +464,7 @@ angular.module('starter.services', ['starter.constants'])
 		},
 		follow: function(userId, followedId){
 			console.log('Following User');
-			console.log(User.get(followedId));
+			console.log(Users.get(followedId));
 
 			var f = {}
 			f.followerId = userId;
@@ -448,14 +474,21 @@ angular.module('starter.services', ['starter.constants'])
 
 			followers.push(f);
 			return f;
+		},
+		isFollowing: function(followerId, followedId){
+			for(f of followers){
+				if(f.followerId == followerId && f.followedId == followedId)
+					return true;
+			}
+			return false;
 		}
-		// TODO: follow
 	};
 })
 
 //TODO: when user visits local, add the a challenge as completed
 //TODO: in db only cascade delete for recipient when status = 0, 1
 //TODO: add timestamp for completion
+//TODO: Set up time check on getting challenges
 
 .factory('Challenges', function(Users, Landmarks){
 	var challenges = [{
@@ -631,20 +664,24 @@ angular.module('starter.services', ['starter.constants'])
 		status: 2
 	}];
 
+	function createChallenge(senderId, recipientId, landmarkId){
+		var c = {};
+		c.id = challenges[challenges.length-1].id + 1;
+		c.landmark_id = landmarkId;
+		c.landmark = Landmarks.get(landmarkId);
+		c.sender_id = senderId;
+		c.sender = Users.get(senderId);
+		c.recipient_id = recipientId;
+		c.recipient = Users.get(recipientId);
+		c.status = 1;
+		challenges.push(c);
+		console.log("Challenge Created");
+		console.log(c);
+	}
+
 	return{
 		create: function(senderId, recipientId, landmarkId){
-			var c = {};
-			c.id = challenges[challenges.length-1].id + 1;
-			c.landmark_id = landmarkId;
-			c.landmark = Landmarks.get(landmarkId);
-			c.sender_id = senderId;
-			c.sender = Users.get(senderId);
-			c.recipient_id = recipientId;
-			c.recipient = Users.get(recipientId);
-			c.status = 1;
-			challenges.push(c);
-			console.log("Challenge Created");
-			console.log(c);
+			createChallenge(senderId, recipientId, landmarkId);
 		},
 		get: function(cId){
 			for(c of challenges){
@@ -659,6 +696,23 @@ angular.module('starter.services', ['starter.constants'])
 					break;
 				}
 			}
+		},
+		check_in: function(userId, landmark, status){
+			var setVisited = false;
+			for(c of challenges){
+				if(c.recipient_id === parseInt(userId) && c.landmark_id == landmark.id && c.status === 1){
+					// Find completed challenge, set status to 2 or 3
+					if(!setVisited){
+						setVisited = true;
+						c.status = status;
+					}
+					// Set any other challenges for the same landmark to a status of 0
+					else
+						c.status = 0;
+				}
+			}
+			
+			
 		},
 		get_pending: function(userId){
 			var pending = [];
@@ -714,6 +768,11 @@ angular.module('starter.services', ['starter.constants'])
 			}
 			for(var i=rem_indexes.length-1; i>=0; i--)
 				challenges.splice(rem_indexes[i], 1);
+		},
+		follow_challenges: function(userId, followedId){
+			var newLandmarks = Landmarks.get_by_user(followedId);
+			for(l of newLandmarks)
+				createChallenge(followedId, userId, l.id);
 		}
 	}
 })
