@@ -166,17 +166,27 @@ angular.module('starter.services', ['starter.constants'])
 		id: 3,
 		first_name: 'Chris',
 		last_name: 'Walker',
-		username: 'cwalke03'
+		username: 'cwalker'
 	}, {
 		id: 4,
 		first_name: 'Jon',
 		last_name: 'Mize',
-		username: 'jmize1'
+		username: 'jmize'
 	}, {
 		id: 5,
 		first_name: 'Scott',
 		last_name: 'Michener',
 		username: 'smichener'
+	}, {
+		id: 6,
+		first_name: 'Ryan',
+		last_name: 'Bauman',
+		username: 'rbauman'
+	}, {
+		id: 7,
+		first_name: 'Lucas',
+		last_name: 'Mckeon',
+		username: 'lmckeon'
 	}];
 
 	return {
@@ -248,10 +258,10 @@ angular.module('starter.services', ['starter.constants'])
 		discover_radius: 0
 	}, {
 		id: 4,
-		location_name: 'House',
+		location_name: 'My House',
 		latitude: 40.0244978,
 		longitude: -75.2119462,
-		description: 'Try some beer',
+		description: 'Try my first attempt at brewing beer',
 		creator_id: 2,
 		creator: Users.get(2),
 		date_created: formatDate(new Date()),
@@ -284,10 +294,10 @@ angular.module('starter.services', ['starter.constants'])
 		discover_radius: 0
 	}, {
 		id: 7,
-		location_name: 'Local Landmark',
+		location_name: 'Deke\'s BBQ',
 		latitude: 40.0244978,
 		longitude: -75.2119462,
-		description: 'Local Landmark Test',
+		description: 'Get some ribs',
 		creator_id: 1,
 		creator: Users.get(1),
 		date_created: formatDate(new Date()),
@@ -296,10 +306,10 @@ angular.module('starter.services', ['starter.constants'])
 		discover_radius: 30
 	}, {
 		id: 8,
-		location_name: 'Local Landmark 2',
-		latitude: 40.0244978,
-		longitude: -75.2119462,
-		description: 'Local Landmark Test 2',
+		location_name: 'Wells Fargo Center',
+		latitude: 39.901111,
+		longitude: -75.171944,
+		description: 'Watch the Flyers play',
 		creator_id: 1,
 		creator: Users.get(1),
 		date_created: formatDate(new Date()),
